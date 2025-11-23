@@ -44,26 +44,30 @@ function gerarFaturaStr (fatura, pecas) {
       return creditos;   
     }
 
-    let creditos = 0;
-    let totalFatura = 0;
-    let faturaStr = `Fatura ${fatura.cliente}\n`;
-     
-    for (let apre of fatura.apresentacoes) {
-      const peca = getPeca(apre); 
-
-      let total = calcularTotalApresentacao(apre);
-
-      creditos += calcularCredito(apre);
-  
-      // mais uma linha da fatura
-      faturaStr += `  ${peca.nome}: ${formatarMoeda(total)} (${apre.audiencia} assentos)\n`;
-      totalFatura += total;
+    function calcularTotalCreditos(){
+        let creditos = 0
+        for (let apre of fatura.apresentacoes) {
+            creditos += calcularCredito(apre);
+        }
+        return creditos
     }
 
-    faturaStr += `Valor total: ${formatarMoeda(totalFatura)}\n`;
-    faturaStr += `Créditos acumulados: ${creditos} \n`;
+    function calcularTotalFatura(){
+        let preco = 0
+        for (let apre of fatura.apresentacoes) {
+            preco += calcularTotalApresentacao(apre);
+        }
+        return preco 
+    }
+
+    let faturaStr = `Fatura ${fatura.cliente}\n`;
+    for (let apre of fatura.apresentacoes) {
+        faturaStr += `  ${getPeca(apre).nome}: ${formatarMoeda(calcularTotalApresentacao(apre))} (${apre.audiencia} assentos)\n`;
+    }
+    faturaStr += `Valor total: ${formatarMoeda(calcularTotalFatura())}\n`;
+    faturaStr += `Créditos acumulados: ${calcularTotalCreditos()} \n`;
     return faturaStr;
-  }
+}
 
 const faturas = JSON.parse(readFileSync('./faturas.json'));
 const pecas = JSON.parse(readFileSync('./pecas.json'));
